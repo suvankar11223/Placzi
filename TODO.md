@@ -1,0 +1,3 @@
+- [x] Fix unescaped entities in CareerPathPrediction.jsx by replacing &ldquo; and &rdquo; with " - File not found, task not applicable
+- [x] Fix unescaped entities in QuantificationEngine.jsx by replacing " with " in the replace string - No unescaped entities found in file
+- [x] Run ESLint to verify fixes - ESLint run completed, no errors related to unescaped entities
