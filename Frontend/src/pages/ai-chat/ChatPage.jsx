@@ -5,6 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "@/components/ai/ChatInput";
 import TypingDots from "@/components/ui/TypingDots";
 import { getAllResumeData } from "@/Services/resumeAPI";
+import { VITE_APP_URL } from "@/config/config";
 import "./chat.css";
 
 export default function ChatPage() {
@@ -39,16 +40,6 @@ export default function ChatPage() {
     fetchResumes();
   }, []);
 
-  // Listen for revert button clicks
-  useEffect(() => {
-    const handleRevertEvent = (event) => {
-      sendMessage(event.detail.message);
-    };
-
-    window.addEventListener('sendMessage', handleRevertEvent);
-    return () => window.removeEventListener('sendMessage', handleRevertEvent);
-  }, [sendMessage]);
-
   const sendMessage = useCallback(async (message) => {
     if (!message.trim() || !selectedResumeId) return;
 
@@ -57,7 +48,7 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5001/api/ai/chat", {
+      const res = await fetch(`${VITE_APP_URL}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -87,6 +78,16 @@ export default function ChatPage() {
 
     setLoading(false);
   }, [selectedResumeId]);
+
+  // Listen for revert button clicks
+  useEffect(() => {
+    const handleRevertEvent = (event) => {
+      sendMessage(event.detail.message);
+    };
+
+    window.addEventListener('sendMessage', handleRevertEvent);
+    return () => window.removeEventListener('sendMessage', handleRevertEvent);
+  }, [sendMessage]);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-green-50 to-green-100 text-gray-900">

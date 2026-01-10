@@ -2,7 +2,7 @@ import axios from "axios";
 import { VITE_APP_URL } from "@/config/config";
 
 const axiosInstance = axios.create({
-  baseURL: VITE_APP_URL + "api/",
+  baseURL: VITE_APP_URL + "/api/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -200,6 +200,31 @@ const getIntegrityGuardian = async (resumeId) => {
   }
 };
 
+const runRAGTailoring = async (resumeId, jobDescription) => {
+  try {
+    const response = await axiosInstance.post("resumes/rag-tailoring", {
+      resumeId,
+      jobDescription,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error?.response?.data?.message || error?.message || "Something Went Wrong"
+    );
+  }
+};
+
+const getRAGTailoring = async (resumeId) => {
+  try {
+    const response = await axiosInstance.get(`resumes/get-rag-tailoring?id=${resumeId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error?.response?.data?.message || error?.message || "Something Went Wrong"
+    );
+  }
+};
+
 export {
   getAllResumeData,
   deleteThisResume,
@@ -217,4 +242,6 @@ export {
   getCareerPathPrediction,
   runIntegrityGuardian,
   getIntegrityGuardian,
+  runRAGTailoring,
+  getRAGTailoring,
 };

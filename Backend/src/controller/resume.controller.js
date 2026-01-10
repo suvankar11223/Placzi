@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Resume from "../models/resume.model.js";
+import mongoose from "mongoose";
 import { pipeline } from "@xenova/transformers";
 import { AIChatSession } from "../utils/aiService.js";
 
@@ -11,6 +12,12 @@ const start = async (req, res) => {
 };
 
 const createResume = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Authentication required."));
+  }
+
   const { title, themeColor } = req.body;
 
   // Validate that the title and themeColor are provided
@@ -53,6 +60,12 @@ const createResume = async (req, res) => {
 };
 
 const getALLResume = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Authentication required."));
+  }
+
   try {
     const resumes = await Resume.find({ user: req.user });
     return res
@@ -102,6 +115,12 @@ const getResume = async (req, res) => {
 };
 
 const updateResume = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Authentication required."));
+  }
+
   console.log("Resume update request received:");
   const id = req.query.id;
 
@@ -139,6 +158,12 @@ const updateResume = async (req, res) => {
 };
 
 const removeResume = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Authentication required."));
+  }
+
   const id = req.query.id;
 
   try {
@@ -417,12 +442,24 @@ const getResumeHeatmap = async (req, res) => {
 };
 
 const ragTailoring = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Authentication required."));
+  }
+
   const { resumeId, jobDescription } = req.body;
 
   if (!resumeId || !jobDescription) {
     return res
       .status(400)
       .json(new ApiError(400, "Resume ID and Job Description are required."));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(resumeId)) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "Invalid Resume ID."));
   }
 
   try {
@@ -573,7 +610,7 @@ const careerPathPrediction = async (req, res) => {
     }
 
     // Check if the resume belongs to the current user
-    if (resume.user.toString() !== req.user._id.toString()) {
+    if (!req.user || resume.user.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json(new ApiError(403, "You are not authorized to access this resume."));
@@ -896,8 +933,8 @@ const processRAGTailoring = async (resumeId, jobDescription) => {
     // Extract bullet points from resume
     const bulletPoints = [];
     resume.experience.forEach(exp => {
-      if (exp.description) {
-        const points = exp.description.split('\n').filter(point => point.trim());
+      if (exp.workSummary) {
+        const points = exp.workSummary.split('\n').filter(point => point.trim());
         bulletPoints.push(...points);
       }
     });
@@ -1089,7 +1126,7 @@ const processIntegrityGuardian = async (resumeId) => {
     // Extract full resume text
     let resumeText = `${resume.firstName} ${resume.lastName}\n${resume.summary}\n`;
     resume.experience.forEach(exp => {
-      resumeText += `${exp.description}\n`;
+      resumeText += `${exp.workSummary}\n`;
     });
     resume.skills.forEach(skill => {
       resumeText += `${skill.name}\n`;
@@ -1136,7 +1173,7 @@ Please respond with a JSON object:
 
       // Check for repeated keywords
       const skillsText = resume.skills.map(s => s.name).join(' ').toLowerCase();
-      const experienceText = resume.experience.map(exp => exp.description || '').join(' ').toLowerCase();
+      const experienceText = resume.experience.map(exp => exp.workSummary || '').join(' ').toLowerCase();
 
       const keywords = ['javascript', 'python', 'react', 'node', 'sql'];
       keywords.forEach(keyword => {

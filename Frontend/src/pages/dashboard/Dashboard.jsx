@@ -8,6 +8,7 @@ import QuantificationEngineCard from "./components/QuantificationEngineCard";
 import SkillGapAnalysisCard from "./components/SkillGapAnalysisCard";
 import RAGTailoringCard from "./components/RAGTailoringCard";
 import ResumeHeatmapCard from "./components/ResumeHeatmapCard";
+
 import { getAllResumeData } from "@/Services/resumeAPI";
 
 const Dashboard = () => {
@@ -93,8 +94,8 @@ const Dashboard = () => {
             </>
           )}
           {resumes.length === 0 && (
-            <div className="col-span-full text-center py-8 text-gray-500">
-              <p>Create a resume to access AI-powered tools.</p>
+            <div className="col-span-full text-center py-8 text-gray-500 md:col-start-2">
+              <p>Create a resume to access AI-powered resume tools.</p>
             </div>
           )}
         </div>

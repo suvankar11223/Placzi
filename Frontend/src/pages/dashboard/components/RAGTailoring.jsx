@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { FileText, Loader, Target, Zap } from "lucide-react";
-import { getResumeData } from "@/Services/resumeAPI";
+import { getResumeData, runRAGTailoring, getRAGTailoring } from "@/Services/resumeAPI";
 import { AIChatSession } from "@/Services/AiModel";
 import {
   Dialog,
@@ -15,7 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import axios from "axios";
 import { toast } from "sonner";
 
 function RAGTailoring({ resumeId, isOpen, onClose }) {
@@ -40,17 +39,14 @@ function RAGTailoring({ resumeId, isOpen, onClose }) {
     setLoading(true);
     try {
       // Start RAG tailoring
-      await axios.post(`${import.meta.env.VITE_APP_URL}/api/resumes/rag-tailoring`, {
-        resumeId,
-        jobDescription
-      });
+      await runRAGTailoring(resumeId, jobDescription);
 
       // Poll for results
       setPolling(true);
       const pollInterval = setInterval(async () => {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_APP_URL}/api/resumes/get-rag-tailoring?id=${resumeId}`);
-          if (response.data.data.status === 'completed') {
+          const response = await getRAGTailoring(resumeId);
+          if (response.data.status === 'completed') {
             clearInterval(pollInterval);
             setPolling(false);
             setTailoringResult({
@@ -65,7 +61,7 @@ function RAGTailoring({ resumeId, isOpen, onClose }) {
                 "Enhanced ATS compatibility"
               ],
               atsScore: 85,
-              tailoredBulletPoints: response.data.data.tailoredBulletPoints
+              tailoredBulletPoints: response.data.tailoredBulletPoints
             });
           } else if (response.data.data.status === 'failed') {
             clearInterval(pollInterval);
