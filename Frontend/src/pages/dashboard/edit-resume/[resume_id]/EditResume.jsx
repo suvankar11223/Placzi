@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { addResumeData } from "@/features/resume/resumeFeatures";
 import { Button } from "@/components/ui/button";
 import html2canvas from "html2canvas";
-import jsPDF from "jsPDF";
+import jsPDF from "jspdf";
 
 const downloadPDF = async () => {
   const element = document.getElementById("resume-preview");
